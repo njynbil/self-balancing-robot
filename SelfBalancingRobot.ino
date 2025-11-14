@@ -2,6 +2,7 @@
 #include <PID_v1.h>
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <Wire.h>
+#include "MPU6050_Calibration.h"
 
 // L298N motor driver pin connections
 const int ENA = 3;
@@ -44,6 +45,8 @@ void dmpDataReady() {
   mpuInterrupt = true;
 }
 
+MPU6050Calibration mpuCalibration; //callibration
+
 void setup() {
   Serial.begin(115200);
   Wire.begin();
@@ -64,10 +67,11 @@ void setup() {
   devStatus = mpu.dmpInitialize();
 
   // Calibrate MPU6050
-  mpu.setXGyroOffset(450);
-  mpu.setYGyroOffset(41);
-  mpu.setZGyroOffset(-17);
-  mpu.setZAccelOffset(856);
+  mpuCalibration.runCalibrationWithLED(13);
+  mpu.setXGyroOffset(mpuCalibration.getGyroXOffset);
+  mpu.setYGyroOffset(mpuCalibration.getGyroYOffset);
+  mpu.setZGyroOffset(mpuCalibration.getGyroZOffset);
+  mpu.setZAccelOffset(mpuCalibration.getAccelZOffset);
 
   if (devStatus == 0) {
     mpu.setDMPEnabled(true);
